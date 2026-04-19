@@ -1,0 +1,24 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# dbt
+.dbt/
+target/
+dbt_packages/
+logs/
+
+# Generated TPC-DS data (1 GB, regenerable from dbgen)
+data/*.dat
+
+# dbt/Postgres pipeline logs
+/logs/
+
+# Editor
+.vscode/
+.idea/

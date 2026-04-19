@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: mart_sales_performance
+    description: "Daily (date, channel) sales + returns rollup. Roll up to month with GROUP BY (sale_year, sale_month)."
+    columns:
+      - name: channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['store', 'catalog', 'web']
+
+  - name: mart_channel_comparison
+    description: "Monthly side-by-side comparison of store vs catalog vs web (wide format)."
+
+  - name: mart_product_analytics
+    description: "Per-item sales, returns, and rank across channels. Joinable to dim_item."
+    columns:
+      - name: i_item_sk
+        data_tests:
+          - not_null
+          - unique
+
+  - name: mart_customer_360
+    description: "Per-customer lifetime value, RFM score, and segment. Joinable to dim_customer."
+    columns:
+      - name: c_customer_sk
+        data_tests:
+          - not_null
+          - unique
+      - name: segment
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Champions', 'Loyal', 'At risk high-value', 'Hibernating', 'New', 'Active', 'No purchase']

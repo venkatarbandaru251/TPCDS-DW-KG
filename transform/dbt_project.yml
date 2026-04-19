@@ -1,0 +1,28 @@
+name: 'tpcds_dw'
+version: '1.0.0'
+config-version: 2
+
+profile: 'tpcds_dw'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Bronze is populated by the Python ingestion pipeline and only declared here
+# as sources. dbt owns Silver and Gold.
+models:
+  tpcds_dw:
+    silver:
+      +materialized: table
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold
