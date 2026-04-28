@@ -1,0 +1,273 @@
+{
+  "$comment": "Retail ontology over the TPC-DS Silver layer. Each class maps to a silver dimension (the node source); relationships map to foreign-key edges between dims or to aggregated fact edges built by build_graph.py.",
+  "version": 1,
+  "classes": {
+    "Customer": {
+      "description": "A person who buys goods through store, catalog, or web channels.",
+      "source_table": "silver.dim_customer",
+      "natural_key": "c_customer_id",
+      "surrogate_key": "c_customer_sk",
+      "label_expr": "coalesce(c_first_name, '') || ' ' || coalesce(c_last_name, '')",
+      "properties": [
+        {"name": "first_name", "column": "c_first_name"},
+        {"name": "last_name", "column": "c_last_name"},
+        {"name": "email", "column": "c_email_address"},
+        {"name": "birth_year", "column": "c_birth_year"},
+        {"name": "birth_country", "column": "c_birth_country"},
+        {"name": "preferred_cust_flag", "column": "c_preferred_cust_flag"}
+      ]
+    },
+    "Address": {
+      "description": "A postal address (city, state, zip).",
+      "source_table": "silver.dim_customer_address",
+      "natural_key": "ca_address_id",
+      "surrogate_key": "ca_address_sk",
+      "label_expr": "coalesce(ca_city, '') || ', ' || coalesce(ca_state, '')",
+      "properties": [
+        {"name": "city", "column": "ca_city"},
+        {"name": "state", "column": "ca_state"},
+        {"name": "zip", "column": "ca_zip"},
+        {"name": "country", "column": "ca_country"},
+        {"name": "street_name", "column": "ca_street_name"}
+      ]
+    },
+    "Demographics": {
+      "description": "Customer demographic profile (gender, marital/education status).",
+      "source_table": "silver.dim_customer_demographics",
+      "surrogate_key": "cd_demo_sk",
+      "label_expr": "coalesce(cd_gender, '?') || '/' || coalesce(cd_marital_status, '?') || '/' || coalesce(cd_education_status, '?')",
+      "properties": [
+        {"name": "gender", "column": "cd_gender"},
+        {"name": "marital_status", "column": "cd_marital_status"},
+        {"name": "education_status", "column": "cd_education_status"},
+        {"name": "credit_rating", "column": "cd_credit_rating"}
+      ]
+    },
+    "HouseholdDemographics": {
+      "description": "Household composition (dependents, vehicles, buy potential).",
+      "source_table": "silver.dim_household_demographics",
+      "surrogate_key": "hd_demo_sk",
+      "label_expr": "'buy:' || coalesce(hd_buy_potential, '?')",
+      "properties": [
+        {"name": "buy_potential", "column": "hd_buy_potential"},
+        {"name": "dep_count", "column": "hd_dep_count"},
+        {"name": "vehicle_count", "column": "hd_vehicle_count"}
+      ]
+    },
+    "IncomeBand": {
+      "description": "An income bracket [lower, upper].",
+      "source_table": "silver.dim_income_band",
+      "surrogate_key": "ib_income_band_sk",
+      "label_expr": "ib_lower_bound::text || '-' || ib_upper_bound::text",
+      "properties": [
+        {"name": "lower_bound", "column": "ib_lower_bound"},
+        {"name": "upper_bound", "column": "ib_upper_bound"}
+      ]
+    },
+    "Item": {
+      "description": "A product SKU sold across channels.",
+      "source_table": "silver.dim_item",
+      "natural_key": "i_item_id",
+      "surrogate_key": "i_item_sk",
+      "label_expr": "coalesce(i_product_name, i_item_desc, i_item_id)",
+      "properties": [
+        {"name": "product_name", "column": "i_product_name"},
+        {"name": "description", "column": "i_item_desc"},
+        {"name": "category", "column": "i_category"},
+        {"name": "class", "column": "i_class"},
+        {"name": "brand", "column": "i_brand"},
+        {"name": "current_price", "column": "i_current_price"},
+        {"name": "wholesale_cost", "column": "i_wholesale_cost"},
+        {"name": "size", "column": "i_size"},
+        {"name": "color", "column": "i_color"}
+      ]
+    },
+    "Store": {
+      "description": "A physical retail store.",
+      "source_table": "silver.dim_store",
+      "natural_key": "s_store_id",
+      "surrogate_key": "s_store_sk",
+      "label_expr": "coalesce(s_store_name, s_store_id)",
+      "properties": [
+        {"name": "store_name", "column": "s_store_name"},
+        {"name": "city", "column": "s_city"},
+        {"name": "state", "column": "s_state"},
+        {"name": "zip", "column": "s_zip"},
+        {"name": "manager", "column": "s_manager"},
+        {"name": "number_employees", "column": "s_number_employees"},
+        {"name": "floor_space", "column": "s_floor_space"}
+      ]
+    },
+    "CallCenter": {
+      "description": "A call center fulfilling catalog orders.",
+      "source_table": "silver.dim_call_center",
+      "surrogate_key": "cc_call_center_sk",
+      "label_expr": "coalesce(cc_name, cc_call_center_id)",
+      "properties": [
+        {"name": "name", "column": "cc_name"},
+        {"name": "manager", "column": "cc_manager"},
+        {"name": "city", "column": "cc_city"},
+        {"name": "state", "column": "cc_state"},
+        {"name": "employees", "column": "cc_employees"}
+      ]
+    },
+    "Warehouse": {
+      "description": "A warehouse from which goods ship.",
+      "source_table": "silver.dim_warehouse",
+      "surrogate_key": "w_warehouse_sk",
+      "label_expr": "coalesce(w_warehouse_name, w_warehouse_id)",
+      "properties": [
+        {"name": "name", "column": "w_warehouse_name"},
+        {"name": "city", "column": "w_city"},
+        {"name": "state", "column": "w_state"},
+        {"name": "sq_ft", "column": "w_warehouse_sq_ft"}
+      ]
+    },
+    "WebSite": {
+      "description": "An e-commerce web site.",
+      "source_table": "silver.dim_web_site",
+      "surrogate_key": "web_site_sk",
+      "label_expr": "coalesce(web_name, web_site_id)",
+      "properties": [
+        {"name": "name", "column": "web_name"},
+        {"name": "manager", "column": "web_manager"},
+        {"name": "city", "column": "web_city"},
+        {"name": "state", "column": "web_state"}
+      ]
+    },
+    "WebPage": {
+      "description": "A page of an e-commerce web site.",
+      "source_table": "silver.dim_web_page",
+      "surrogate_key": "wp_web_page_sk",
+      "label_expr": "'page:' || coalesce(wp_web_page_id, wp_web_page_sk::text)",
+      "properties": [
+        {"name": "type", "column": "wp_type"},
+        {"name": "char_count", "column": "wp_char_count"},
+        {"name": "link_count", "column": "wp_link_count"}
+      ]
+    },
+    "CatalogPage": {
+      "description": "A page within a mailed paper catalog.",
+      "source_table": "silver.dim_catalog_page",
+      "surrogate_key": "cp_catalog_page_sk",
+      "label_expr": "coalesce(cp_department, cp_catalog_page_id)",
+      "properties": [
+        {"name": "department", "column": "cp_department"},
+        {"name": "catalog_number", "column": "cp_catalog_number"},
+        {"name": "page_number", "column": "cp_catalog_page_number"},
+        {"name": "type", "column": "cp_type"}
+      ]
+    },
+    "Promotion": {
+      "description": "A marketing promotion (discount, campaign, channel set).",
+      "source_table": "silver.dim_promotion",
+      "surrogate_key": "p_promo_sk",
+      "label_expr": "coalesce(p_promo_name, p_promo_id)",
+      "properties": [
+        {"name": "name", "column": "p_promo_name"},
+        {"name": "discount_active", "column": "p_discount_active"},
+        {"name": "channel_email", "column": "p_channel_email"},
+        {"name": "channel_tv", "column": "p_channel_tv"},
+        {"name": "cost", "column": "p_cost"}
+      ]
+    },
+    "ShipMode": {
+      "description": "A shipping mode (carrier + speed).",
+      "source_table": "silver.dim_ship_mode",
+      "surrogate_key": "sm_ship_mode_sk",
+      "label_expr": "coalesce(sm_type, '') || '/' || coalesce(sm_carrier, '')",
+      "properties": [
+        {"name": "type", "column": "sm_type"},
+        {"name": "code", "column": "sm_code"},
+        {"name": "carrier", "column": "sm_carrier"},
+        {"name": "contract", "column": "sm_contract"}
+      ]
+    },
+    "Reason": {
+      "description": "A reason code (used for returns).",
+      "source_table": "silver.dim_reason",
+      "surrogate_key": "r_reason_sk",
+      "label_expr": "coalesce(r_reason_desc, r_reason_id)",
+      "properties": [
+        {"name": "description", "column": "r_reason_desc"}
+      ]
+    }
+  },
+  "relationships": {
+    "LIVES_AT": {
+      "description": "Customer's current mailing address.",
+      "from": "Customer",
+      "to": "Address",
+      "kind": "fk",
+      "from_column_sk": "c_current_addr_sk",
+      "to_class_sk_column": "ca_address_sk"
+    },
+    "HAS_DEMOGRAPHICS": {
+      "description": "Customer's demographic profile.",
+      "from": "Customer",
+      "to": "Demographics",
+      "kind": "fk",
+      "from_column_sk": "c_current_cdemo_sk",
+      "to_class_sk_column": "cd_demo_sk"
+    },
+    "IN_HOUSEHOLD": {
+      "description": "Customer's current household demographics.",
+      "from": "Customer",
+      "to": "HouseholdDemographics",
+      "kind": "fk",
+      "from_column_sk": "c_current_hdemo_sk",
+      "to_class_sk_column": "hd_demo_sk"
+    },
+    "IN_INCOME_BAND": {
+      "description": "Household income bracket.",
+      "from": "HouseholdDemographics",
+      "to": "IncomeBand",
+      "kind": "fk",
+      "from_column_sk": "hd_income_band_sk",
+      "to_class_sk_column": "ib_income_band_sk"
+    },
+    "PURCHASED": {
+      "description": "Aggregate edge: customer bought an item (any channel). Edge properties carry totals (order_count, quantity, net_paid).",
+      "from": "Customer",
+      "to": "Item",
+      "kind": "aggregate",
+      "source": "silver.int_sales_unified",
+      "from_column_sk": "customer_sk",
+      "to_column_sk": "item_sk",
+      "aggregates": {
+        "order_count": "count(distinct channel || '|' || order_number)",
+        "quantity": "sum(quantity)",
+        "net_paid": "sum(net_paid)"
+      },
+      "top_n_per_from": 5
+    },
+    "SHOPPED_AT": {
+      "description": "Aggregate edge: customer bought from a store (store channel only).",
+      "from": "Customer",
+      "to": "Store",
+      "kind": "aggregate",
+      "source": "silver.fact_store_sales",
+      "from_column_sk": "ss_customer_sk",
+      "to_column_sk": "ss_store_sk",
+      "aggregates": {
+        "order_count": "count(distinct ss_ticket_number)",
+        "net_paid": "sum(ss_net_paid)"
+      },
+      "top_n_per_from": 3
+    },
+    "RETURNED": {
+      "description": "Aggregate edge: customer returned an item with a reason.",
+      "from": "Customer",
+      "to": "Reason",
+      "kind": "aggregate",
+      "source": "silver.int_returns_unified",
+      "from_column_sk": "customer_sk",
+      "to_column_sk": "reason_sk",
+      "aggregates": {
+        "return_count": "count(*)",
+        "return_amt": "sum(return_amt)"
+      },
+      "top_n_per_from": 3
+    }
+  }
+}
