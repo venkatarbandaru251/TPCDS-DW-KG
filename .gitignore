@@ -22,3 +22,6 @@ data/*.dat
 # Editor
 .vscode/
 .idea/
+
+# Medium drafts (not for publishing)
+article*.html
