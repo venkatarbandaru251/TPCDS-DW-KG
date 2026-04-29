@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>From Warehouse to Knowledge Graph — Part 2 of the Spec-Driven Build</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #292929;
+    --muted: #6b6b6b;
+    --border: #e6e6e6;
+    --accent: #0f766e;
+    --code-bg: #f6f8fa;
+    --callout-bg: #fef9c3;
+    --callout-border: #eab308;
+    --success-bg: #ecfdf5;
+    --success-border: #10b981;
+  }
+  html { background: var(--bg); }
+  body {
+    font-family: charter, "Source Serif Pro", "PT Serif", Georgia, serif;
+    color: var(--ink);
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    line-height: 1.65;
+    font-size: 19px;
+  }
+  h1 {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 42px;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+  h2 {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 48px 0 12px;
+  }
+  h3 {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 20px;
+    margin: 28px 0 8px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1.4;
+    margin: 0 0 24px;
+  }
+  .byline {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+  }
+  p { margin: 0 0 20px; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 15px;
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  pre {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 0 0 0 20px;
+    margin: 28px 0;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1.4;
+  }
+  .callout {
+    background: var(--callout-bg);
+    border: 1px solid var(--callout-border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    font-size: 17px;
+  }
+  .callout .label {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #854d0e;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .success {
+    background: var(--success-bg);
+    border: 1px solid var(--success-border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    font-size: 17px;
+  }
+  .success .label {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #065f46;
+    display: block;
+    margin-bottom: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th { background: var(--code-bg); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  ul, ol { margin: 0 0 20px; padding-left: 28px; }
+  li { margin-bottom: 6px; }
+  .diagram {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 6px;
+    white-space: pre;
+    overflow-x: auto;
+    margin: 24px 0;
+    line-height: 1.4;
+  }
+  figure.spec-figure {
+    margin: 32px 0;
+    text-align: center;
+  }
+  figure.spec-figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  figure.spec-figure figcaption {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 12px;
+    text-align: left;
+    line-height: 1.5;
+  }
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--muted);
+    font-family: -apple-system, "Segoe UI", sans-serif;
+  }
+  .success ul { margin: 0; }
+</style>
+</head>
+<body>
+
+<h1>Part 2: From Warehouse to Knowledge Graph — Teaching Gold to Speak</h1>
+<p class="subtitle">Continuing the spec-driven TPC-DS build: an ontology, a knowledge graph in Postgres, an Ollama-backed Q&amp;A API, and a Neo4j visualization. Plus the silent, one-character bug that nearly ate the whole demo.</p>
+<p class="byline">Part 2 of a hands-on write-up from the front lines · <a href="article.html">Read Part 1</a></p>
+
+<h2>Where we left off</h2>
+
+<p>In <a href="article.html">Part 1</a>, an empty folder became a running Bronze/Silver/Gold warehouse on Postgres — 25 TPC-DS tables ingested, 48 dbt models generated, four Gold marts for the Business Analyst, and a dashboard for the Reliability Engineer. Four phases, 130 dbt nodes, sub-10-ms Gold queries. The CEO gets her data by 7 AM; the BA gets <code>mart_customer_360</code>; the RE gets his live health view.</p>
+
+<p>And then I did what you always do after shipping a warehouse. I stared at it. And I thought: <em>who actually uses this?</em></p>
+
+<p>The honest answer is: a small number of analysts who know SQL, know the join keys, and have the patience to navigate a star schema from memory. Everyone else — the line-of-business person, the product manager, the executive who just wants to ask "which customers in California bought most from us last quarter?" — they don't touch it. Not because the data isn't there. Because the <em>interface</em> isn't there.</p>
+
+<p>So I added two more phases to the roadmap.</p>
+
+<ul>
+  <li><strong>Phase 4 — Ontology and Knowledge Graph.</strong> Define what the warehouse is <em>about</em> — in plain, business-shaped classes and relationships — and let a local LLM translate questions into SQL.</li>
+  <li><strong>Phase 5 — Display the knowledge graph in Neo4j.</strong> Because a graph you can't <em>see</em> is just another schema diagram in the corner of a wiki no one visits.</li>
+</ul>
+
+<p>What follows is the story of those two phases. Same spec-driven method, same AI pair programmer, same Windows machine. One silent bug that cost me an hour and made an excellent war story. And a second installment that — like the first — ended with me more convinced of the pattern, not less.</p>
+
+<h2>Why add a knowledge graph on top of a warehouse?</h2>
+
+<p>The star schema is a beautiful thing for analytics. It's a miserable thing for exploration. Tell me, from <code>mart_customer_360</code> alone, how a customer connects to their household's income band. You can't; you need to join through <code>dim_household_demographics</code> and <code>dim_income_band</code>. Tell me which items are co-purchased by the highest-LTV customers. You'll be writing a subquery and a window function.</p>
+
+<p>An ontology makes that implicit structure <em>explicit</em>. It says: a Customer <em>lives at</em> an Address. A Customer <em>has</em> Demographics. A Customer <em>is in</em> a Household. A Household <em>is in</em> an Income Band. A Customer <em>purchased</em> an Item. These aren't new facts — they're already in the foreign keys. But naming them, in business language, turns the schema into a thing a non-SQL person can <em>reason</em> about.</p>
+
+<p>And once you have an ontology, three good things become possible:</p>
+
+<ol>
+  <li>You can materialize it as a knowledge graph — nodes and edges — and traverse it the way humans actually think.</li>
+  <li>You can hand that ontology to an LLM as context, and watch it generate useful SQL from plain English.</li>
+  <li>You can visualize it — really visualize it — and suddenly people who never opened pgAdmin in their life are pointing at clusters and asking real questions.</li>
+</ol>
+
+<p>That's the thesis. Phase 4 delivered (1) and (2). Phase 5 delivered (3).</p>
+
+<h2>Phase 4 — The ontology</h2>
+
+<p>I started where I always start now: a planning conversation, not code. What should the classes be? What should the relationships be? The warehouse has 17 dimensions and 7 fact tables; I didn't need all of them as first-class graph citizens, but I did need the ones a business user would recognize.</p>
+
+<p>We landed on 15 classes — <code>Customer</code>, <code>Item</code>, <code>Store</code>, <code>Warehouse</code>, <code>CallCenter</code>, <code>WebSite</code>, <code>WebPage</code>, <code>CatalogPage</code>, <code>Promotion</code>, <code>ShipMode</code>, <code>Reason</code>, <code>Address</code>, <code>Demographics</code>, <code>HouseholdDemographics</code>, <code>IncomeBand</code> — and seven relationships that split neatly into two categories:</p>
+
+<p><strong>Foreign-key edges</strong> (1:1 structural): <code>LIVES_AT</code>, <code>HAS_DEMOGRAPHICS</code>, <code>IN_HOUSEHOLD</code>, <code>IN_INCOME_BAND</code>. These are the join keys already on the dimension tables — the ontology just gives them business names.</p>
+
+<p><strong>Aggregate edges</strong> (summarized fact): <code>PURCHASED</code>, <code>SHOPPED_AT</code>, <code>RETURNED</code>. Each comes out of a <code>GROUP BY</code> over an intermediate fact table, keeps the top-N pairs per source node, and carries aggregate properties on the edge itself — <code>net_paid</code>, <code>order_count</code>, <code>quantity</code>.</p>
+
+<p>The whole definition lives in a single JSON file (<code>knowledge_graph/ontology.json</code>) that looks like this:</p>
+
+<pre><code>{
+  "classes": {
+    "Customer": {
+      "source_table": "silver.dim_customer",
+      "surrogate_key": "c_customer_sk",
+      "natural_key": "c_customer_id",
+      "label_expr": "coalesce(c_first_name,'') || ' ' || coalesce(c_last_name,'')",
+      "properties": [
+        {"name": "email", "column": "c_email_address"},
+        {"name": "birth_year", "column": "c_birth_year"},
+        ...
+      ]
+    },
+    ...
+  },
+  "relationships": {
+    "PURCHASED": {
+      "from": "Customer", "to": "Item", "kind": "aggregate",
+      "source": "silver.int_sales_unified",
+      "from_column_sk": "customer_sk", "to_column_sk": "item_sk",
+      "aggregates": {
+        "order_count": "count(distinct channel || '|' || order_number)",
+        "quantity":    "sum(quantity)",
+        "net_paid":    "sum(net_paid)"
+      },
+      "top_n_per_from": 5
+    },
+    ...
+  }
+}</code></pre>
+
+<p>The ontology is the spec. The loader, the API, the PHP chat page, and eventually the Neo4j push all read from this one file. Change a class, everything downstream picks it up.</p>
+
+<h2>Phase 4 — Materializing the graph in Postgres</h2>
+
+<p>Why Postgres? Because the warehouse was already there, the data was already there, and introducing a second datastore at this stage would have cost more than it bought. A graph is an adjacency list; Postgres handles that fine.</p>
+
+<p>I created a <code>graph</code> schema with five tables — <code>ontology_class</code>, <code>ontology_relationship</code>, <code>node</code>, <code>edge</code>, <code>build_runs</code> — and wrote a loader that reads <code>ontology.json</code>, upserts the metadata, iterates the classes to emit one node per dimension row, then iterates the relationships to emit edges.</p>
+
+<p>The edge loader is where it got interesting. FK edges are easy — a join. Aggregate edges use a CTE that groups the fact table by (from_sk, to_sk), computes the aggregates, and optionally applies a per-source-node top-N so the graph doesn't balloon:</p>
+
+<pre><code>WITH agg AS (
+  SELECT customer_sk AS from_sk, item_sk AS to_sk,
+         count(distinct channel || '|' || order_number) AS order_count,
+         sum(quantity)  AS quantity,
+         sum(net_paid)  AS net_paid
+    FROM silver.int_sales_unified
+   WHERE customer_sk IS NOT NULL AND item_sk IS NOT NULL
+   GROUP BY customer_sk, item_sk
+),
+ranked AS (
+  SELECT *, row_number() OVER (PARTITION BY from_sk ORDER BY net_paid DESC NULLS LAST) AS rn
+    FROM agg
+)
+INSERT INTO graph.edge (...)
+SELECT fn.node_id, tn.node_id, 'PURCHASED', jsonb_build_object(...)
+  FROM ranked src
+  JOIN graph.node fn ON fn.class_name = 'Customer' AND fn.source_sk = src.from_sk
+  JOIN graph.node tn ON tn.class_name = 'Item'     AND tn.source_sk = src.to_sk
+ WHERE src.rn &lt;= 5
+ON CONFLICT (from_node_id, to_node_id, relationship_name) DO UPDATE
+  SET properties = EXCLUDED.properties;</code></pre>
+
+<p>One build, against the existing Silver layer, produced:</p>
+
+<div class="success">
+  <span class="label">Graph in Postgres</span>
+  <ul>
+    <li><strong>2,108,206 nodes</strong> across 15 classes.</li>
+    <li><strong>1,245,212 edges</strong> across 7 relationships.</li>
+    <li>Biggest class: <code>Demographics</code> (1.92 M). Biggest relationship: <code>PURCHASED</code> (494 K).</li>
+    <li>Build took under two minutes. Idempotent — the <code>ON CONFLICT DO UPDATE</code> clauses mean you can re-run after every pipeline refresh.</li>
+  </ul>
+</div>
+
+<p>I'll admit: the first time this ran end-to-end without error, I closed my laptop and walked outside for ten minutes. Two million nodes and a million-plus edges, from a single <code>python -m knowledge_graph.build_graph</code> invocation, against a warehouse the agent built from a roadmap bullet the same afternoon. That's the whole SDD pitch in one command.</p>
+
+<h2>Phase 4 — The LLM on top</h2>
+
+<p>A graph in Postgres is already useful for analysts. But the pitch here was <em>plain English</em>. For that I needed an LLM that generates SQL against <code>graph.node</code> and <code>graph.edge</code>, executes it read-only, and summarizes the result.</p>
+
+<p>I wanted it local. No API key, no per-token cost, no data leaving the machine. Ollama was the obvious choice. The architecture is almost boring:</p>
+
+<div class="diagram">PHP chat page  ──POST {question}──&gt;  Python HTTP API  ──&gt;  Ollama (local)
+                                           │                 │
+                                           │                 └── returns JSON { sql, rationale }
+                                           │
+                                           ├── validate SQL (SELECT-only, whitelist schemas, no semicolons)
+                                           ├── execute against Postgres (graph.* + silver + gold)
+                                           ├── send rows back to Ollama for NL summary
+                                           └── return { sql, rows, answer } to PHP</div>
+
+<p>No Flask, no Django, no agent framework — just <code>http.server</code> from stdlib, <code>urllib.request</code> to reach Ollama, the existing <code>psycopg</code> connection for the warehouse. About 300 lines. The SQL validator is the most important 20: it accepts only queries that start with <code>SELECT</code> or <code>WITH</code>, rejects anything containing a semicolon or a forbidden keyword (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>DROP</code>, …), and requires a reference to one of the whitelisted schemas (<code>graph</code>, <code>silver</code>, <code>gold</code>). If the LLM forgets a <code>LIMIT</code>, one is appended.</p>
+
+<p>And then I spent the next hour and a half fighting a sequence of sharp edges that had nothing to do with my code.</p>
+
+<h3>Surprise 1: the port was "in use" — except it wasn't</h3>
+
+<p>First launch: <code>PermissionError: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions.</code></p>
+
+<p>I know this error. It almost always means the port is reserved by the Hyper-V / WSL / Docker "excluded port range" on Windows 11. Except <code>netsh interface ipv4 show excludedportrange protocol=tcp</code> said 8088 wasn't in the excluded set. <code>Get-NetTCPConnection -LocalPort 8088</code> said nothing was listening. But <code>socket.bind(('127.0.0.1', 8088))</code> returned <code>EADDRINUSE</code> anyway.</p>
+
+<p>Windows networking is a layered operating system inside another operating system, and apparently some layer had reserved 8088 without telling the layers I know how to interrogate. I probed ports with a short Python loop, picked 8089 (which bound fine), and moved on. The fix in the code was a better error message so the <em>next</em> time this happens, the log tells the operator exactly what to do.</p>
+
+<h3>Surprise 2: Ollama returned 404 on a model I hadn't pulled</h3>
+
+<p>Second launch: <code>Ollama unreachable at http://localhost:11434: HTTP Error 404: Not Found</code>.</p>
+
+<p>The model default in my config was <code>llama3.1</code>. My machine had <code>qwen3.5:latest</code>, <code>gemma4:26b</code>, and <code>gemma4:latest</code>. Ollama returns 404 on <code>/api/generate</code> when the model isn't local, which is a user-hostile error code but fine once you know it.</p>
+
+<p>I made <code>/health</code> report <code>model_present</code> and the list of installed models, so misconfiguration is obvious <em>before</em> you submit a question. This is a small thing that would have saved me five minutes; worth the three lines.</p>
+
+<h3>Surprise 3: qwen3.5 returned an empty response</h3>
+
+<p>Third launch, <code>OLLAMA_MODEL=qwen3.5:latest</code>: the API returned <code>could not parse SQL from LLM output: ''</code>.</p>
+
+<p>I called Ollama directly to see what the model was actually producing. It returned an empty string with <code>eval_count: 23</code> — meaning 23 tokens were generated, but the visible response was nothing. That's the signature of a <em>thinking model</em> whose <code>&lt;think&gt;…&lt;/think&gt;</code> block consumed all the output when <code>format: "json"</code> was set.</p>
+
+<blockquote>A small thinking model with <code>format: "json"</code> set produces a perfectly valid empty object. The model thought. It just didn't say anything.</blockquote>
+
+<p>Switched to <code>gemma4:latest</code>. Response came back in a second, parseable.</p>
+
+<h3>Surprise 4: small-model text-to-SQL is a humbling experience</h3>
+
+<p>Asked: "How many nodes are in each class in the knowledge graph?" Got back, verbatim:</p>
+
+<pre><code>SELECT class_name, COUNT(node_id) AS node_count
+  FROM graph.node
+ GROUP BY class_name
+ ORDER BY node_count DESC
+ LIMIT 200</code></pre>
+
+<p>Ran perfectly. 15 rows. Natural-language summary: "The knowledge graph contains the following number of nodes in each class, ordered by count descending: Demographics 1,920,800; Customer 100,000; Address 50,000; ...". I may have done a small fist-pump.</p>
+
+<p>Asked: "Show the top 5 customers by total PURCHASED net_paid." Got back, verbatim:</p>
+
+<pre><code>SELECT ..., SUM(T2.properties->>'net_paid') AS total
+  FROM ...</code></pre>
+
+<p>Postgres, justifiably, replied: <em>function sum(text) does not exist</em>. The model had extracted the JSONB field as text and tried to sum text. This is a well-known text-to-SQL pitfall; the fix is in the system prompt, not the code. I added an explicit rule ("BEFORE aggregating a value from jsonb, cast it: <code>(e.properties-&gt;&gt;'net_paid')::numeric</code>") and — when that alone wasn't enough — a few-shot example of the exact pattern.</p>
+
+<p>On the next run the model produced:</p>
+
+<pre><code>SELECT c.label AS customer_name,
+       SUM((e.properties->>'net_paid')::numeric) AS total_net_paid
+  FROM graph.node c
+  JOIN graph.edge e ON e.from_node_id = c.node_id
+ WHERE c.class_name = 'Customer'
+   AND e.relationship_name = 'PURCHASED'
+ GROUP BY c.node_id, c.label
+ ORDER BY total_net_paid DESC
+ LIMIT 5</code></pre>
+
+<p>Results:</p>
+
+<table>
+  <thead><tr><th>Customer</th><th class="num">Total net paid</th></tr></thead>
+  <tbody>
+    <tr><td>Wayne Land</td><td class="num">$63,707.78</td></tr>
+    <tr><td>Jamel Owen</td><td class="num">$50,998.74</td></tr>
+    <tr><td>Sheila Stover</td><td class="num">$50,188.79</td></tr>
+    <tr><td>Jesus Tilley</td><td class="num">$49,819.85</td></tr>
+    <tr><td>Julie (no last name)</td><td class="num">$49,454.50</td></tr>
+  </tbody>
+</table>
+
+<p>The same answer Phase 2 would have produced with a three-table join and a <code>SUM</code>. But I didn't write the join — the LLM did, from an ontology file and an English sentence.</p>
+
+<figure class="spec-figure">
+  <img src="kg-qa.png" alt="Screenshot of the Phase 4 Knowledge Graph Q&amp;A page. The user has asked 'List 5 items in the Sports category with their brand.' The assistant shows a natural-language answer (five items with their brands), the generated SQL — SELECT n.label, n.properties-&gt;&gt;'product_name', n.properties-&gt;&gt;'brand' FROM graph.node n WHERE n.class_name = 'Item' AND n.properties-&gt;&gt;'category' = 'Sports' LIMIT 5 — and a table with five rows: eseought / brandnameless #5, oughtpri / scholarmaxi #2, esecally / maxinameless #5, ablen st / maxinameless #3, prin st / scholarmaxi #4. A sidebar lists sample questions on the right and live class counts (Demographics, Customer, Address, Item, CatalogPage, ...) pulled from graph.ontology_class.">
+  <figcaption>Figure 4: The Phase 4 chat page. Every question emits a generated SQL query against <code>graph.node</code> / <code>graph.edge</code>, executes it read-only, and returns a natural-language summary. The sidebar shows the live ontology — pulled directly from <code>graph.ontology_class</code> — so the interface always reflects the current state of the graph.</figcaption>
+</figure>
+
+<blockquote>When a local LLM, running on the same machine, writes correct warehouse SQL from plain English and hands you back a ranked list — you realize the interface layer has quietly moved.</blockquote>
+
+<h2>Phase 5 — Display the graph</h2>
+
+<p>Phase 4 gave me a knowledge graph and a way to query it. What it didn't give me was a way to <em>see</em> it. A chat UI is useful but it isn't a map. So Phase 5 was straightforward in scope: put the graph in Neo4j, so I could browse it visually at <code>localhost:7474</code>.</p>
+
+<p>I picked Docker for the install path. Neo4j as a Windows service is a download-installer-restart dance that I don't want to impose on a Medium reader. Neo4j in Docker is:</p>
+
+<pre><code>docker compose -f infra/docker-compose.neo4j.yml up -d</code></pre>
+
+<p>And the Browser is live two minutes later, with the password coming from <code>.env</code> like everything else in the project.</p>
+
+<p>The loader — <code>knowledge_graph/push_to_neo4j.py</code> — reads <code>graph.node</code> and <code>graph.edge</code> from Postgres, connects to Neo4j over Bolt, and pushes in UNWIND-MERGE batches. Every node gets a generic <code>:Entity</code> label (for the uniqueness constraint) plus a per-class label (<code>:Customer</code>, <code>:Item</code>, …) so the Browser colors them nicely. Relationships keep their ontology names: <code>PURCHASED</code>, <code>LIVES_AT</code>, <code>SHOPPED_AT</code>.</p>
+
+<p>Two modes: <code>--sample</code> (default) pushes a bounded subset — top-N customers plus their outbound 2-hop neighbors, about 1,700 nodes — small enough that the Browser will actually render it. <code>--full</code> pushes everything, takes minutes, and is really only useful for Cypher queries rather than visualization.</p>
+
+<figure class="spec-figure">
+  <img src="kg-graph.png" alt="Screenshot of the Neo4j Browser rendering the sampled knowledge graph. The Cypher query 'MATCH (n)-[r]-&gt;(m) RETURN n, r, m' is visible in the top-left panel. The main canvas shows a force-directed layout: several top customers (labeled Robert George, Michael Morris, Tyrone Brock, Donald ..., Martin SC) sit as hubs, each surrounded by a satellite ring of items they purchased (labeled with product names like Maple Grove, ablese-aught, ableble-nameless, scholarmaxi-mary) plus smaller connections to addresses, demographics, and stores. The SHOPPED_AT, PURCHASED, and LIVES_AT relationships form the edges between hubs and satellites.">
+  <figcaption>Figure 5: The sampled graph in the Neo4j Browser. Top customers sit as hubs; their top-5 purchased items orbit them; structural edges (LIVES_AT, IN_HOUSEHOLD, IN_INCOME_BAND) thread them to addresses, households, and income bands. The thing that was a three-way join five minutes ago is now an object you can <em>point at</em>.</figcaption>
+</figure>
+
+<p>The thing that made this phase memorable wasn't the code. It was the bug.</p>
+
+<h2>The silent bug</h2>
+
+<p>First push of the sample looked great. Log output:</p>
+
+<pre><code>[neo4j] sample: 1,715 nodes
+[neo4j] nodes pushed: 1,715
+[neo4j] edges pushed: 2,553
+[neo4j] in database: 1,715 nodes, 1,559 relationships</code></pre>
+
+<p>Relationships-by-type check in Cypher:</p>
+
+<pre><code>RETURNED                   493
+SHOPPED_AT                 287
+LIVES_AT                   200
+IN_HOUSEHOLD               192
+HAS_DEMOGRAPHICS           191
+IN_INCOME_BAND             190
+PURCHASED                    6</code></pre>
+
+<p>Six. Six PURCHASED relationships, out of 1,000 that the Postgres query said were in the sample. The top-N-per-customer math said there should be roughly 1,000 — 200 customers, up to 5 items each — and Postgres confirmed 1,000 when I queried it directly. The Python iterator emitted 1,000 when I instrumented it. The Cypher MERGE statement got 1,000 rows in its parameter list. And only 6 survived.</p>
+
+<p>I spent fifteen minutes convinced it was a MERGE-collapse problem — maybe the (from, to, type) triples weren't as unique as I thought. Counted them. 1,000 unique triples. Not that.</p>
+
+<p>Then I pulled a single row out of the Postgres output: a PURCHASED edge from Customer 2064 to Item 42. Checked Customer 2064 in Neo4j — present, labeled <code>:Customer</code>, <code>source_sk: 2064</code>. Checked Item 42 in Neo4j:</p>
+
+<pre><code>Item source_sk=42: {'label': 'ableese', 'class': 'pop', 'source_sk': 42}
+by class+source_sk: 0</code></pre>
+
+<p>There's the Item. But the match by <code>class: 'Item', source_sk: 42</code> returned zero rows. Because the <code>class</code> property was <code>'pop'</code>, not <code>'Item'</code>.</p>
+
+<p>Slow, reluctant dawning. <code>pop</code>. That's the Item's TPC-DS category. <code>i_class</code> — the column I'd included as a node property back in the ontology — had just overwritten the <code>class</code> identifier I was using for Neo4j MERGE matching. Every Item in Neo4j had its identifier field silently rewritten to the Item's category. And the edge MATCH — keyed on <code>class: 'Item'</code> — was failing on 994 of the 1,000 PURCHASED rows, because those items' <code>class</code> property now said "sports" or "home" or "men's pants".</p>
+
+<p>The fix was one word: rename my internal identifier from <code>class</code> to <code>node_class</code>, so the Item's domain property can't collide with the graph's structural property. One line of the Cypher template. One extra line in <code>_apply_constraints</code> to drop the obsolete constraint.</p>
+
+<p>Re-run: 1,715 nodes, <strong>2,553 relationships</strong>, <strong>1,000 PURCHASED</strong>.</p>
+
+<div class="callout">
+  <span class="label">Why this bug was dangerous</span>
+  <strong>Everything succeeded.</strong> Every query ran without error. Every batch returned. The loader said "edges pushed: 2,553". The Neo4j database said "2,553 relationships" on the first run (before I tightened and re-ran) — wait, no, it said <em>1,559</em>. Because the Cypher <code>MATCH</code>es for the 994 broken rows found no nodes and silently created no relationships. Cypher's MATCH-then-MERGE does not warn you when the MATCH finds nothing; it just does nothing. The count was off by 994 with no error anywhere in any log.
+  <br><br>
+  The only reason I caught it is that I eyeballed the relationship breakdown. If I hadn't, I would have shipped a graph that <em>looked</em> fine and was quietly missing 40% of its most important edges.
+</div>
+
+<blockquote>Domain data has no respect for your schema conventions. If your identifier field name can collide with a user property, it will, and the failure will be silent.</blockquote>
+
+<p>The other two surprises in Phase 5 were less dramatic:</p>
+
+<p>A naive wipe (<code>MATCH (n) DETACH DELETE n</code>) hit Neo4j's per-transaction memory pool (716 MB) once the graph was non-trivial. The Neo4j 5 pattern is <code>MATCH (n) CALL (n) { DETACH DELETE n } IN TRANSACTIONS OF 2000 ROWS</code> — auto-commits per batch, fits in memory, works on any size graph.</p>
+
+<p>My first sample expansion was over-generous. I'd included the small dims (Store, CatalogPage, Warehouse, …) in the sample seed <em>plus</em> done a 1-hop expansion. Which meant: a single <code>Store</code> seed pulled in <em>every customer who had ever shopped at that store</em>. Sample size: 120,000 nodes. The Browser would have rendered the first 300 and called it a day. Restricted expansion to outbound-only-from-top-customers; sample dropped to 1,715, which is what the Browser can actually display.</p>
+
+<h2>What landed — the numbers</h2>
+
+<div class="success">
+  <span class="label">End-to-end numbers</span>
+  <ul>
+    <li><strong>Ontology:</strong> 15 classes, 7 relationships, 213 lines of JSON.</li>
+    <li><strong>Knowledge graph in Postgres:</strong> 2,108,206 nodes and 1,245,212 edges from <code>silver.*</code>.</li>
+    <li><strong>Python KG API:</strong> stdlib-only HTTP server, ~330 lines. Read-only SQL validator (SELECT/WITH-only, schema-whitelisted, no semicolons, auto-<code>LIMIT</code>).</li>
+    <li><strong>PHP chat UI:</strong> one file, 170 lines. Sidebar shows live class/relationship counts pulled from <code>graph.ontology_class</code>.</li>
+    <li><strong>Ollama model:</strong> <code>gemma4:latest</code>, fully local, no keys, no egress.</li>
+    <li><strong>Neo4j:</strong> 5.26 Community in Docker. Sample push: 1,715 nodes / 2,553 relationships. Full push: all 2.1 M / 1.2 M, minutes-scale.</li>
+    <li><strong>Bugs caught during Phase 4/5:</strong> five — the stale port reservation, the missing Ollama model, the empty qwen output, the text-to-SQL cast gap, and the <code>class</code>-property collision. Every one of them silent-ish; every one of them found by eyeballing output.</li>
+  </ul>
+</div>
+
+<p>The demo flow is short. Open the PHP page. Type: <em>"Which stores are in CA?"</em> Watch <code>gemma4</code> generate a 4-line query against <code>graph.node</code>, execute it, and return six California stores with a natural-language summary. Click over to <code>localhost:7474</code>. Paste <code>MATCH (c:Customer)-[p:PURCHASED]->(i:Item) RETURN c, p, i LIMIT 50</code>. Watch a constellation of 50 customer-to-item edges render in the Browser. Click a node; the Browser expands its neighborhood. Suddenly your warehouse is a <em>map</em>.</p>
+
+<h2>What I took away from Phases 4 and 5</h2>
+
+<p>Three things that I expect to carry into the next warehouses in this series.</p>
+
+<p><strong>1. The ontology is the spec that outlasts the storage.</strong> I have the same ontology living in two places now: materialized in Postgres as <code>graph.node</code>/<code>graph.edge</code>, and materialized in Neo4j as labeled nodes and typed relationships. If I add Snowflake next, the ontology moves over untouched. The source tables change; the business meaning doesn't. This is the first time I've felt like a "spec" actually earned its keep as an artifact you port.</p>
+
+<p><strong>2. Local LLMs are good enough to be useful, and small enough to have sharp edges.</strong> <code>gemma4:latest</code> is not GPT-5, and it shouldn't be. It runs on my laptop, it costs zero dollars per query, and it doesn't leave the machine. Give it a well-scoped ontology, a JSON-only output contract, a few-shot example, and a whitelist validator that catches its mistakes, and it produces correct SQL against a warehouse schema it has never seen before. The moment the ecosystem produces a 7B-class model that doesn't need the few-shot on <code>::numeric</code> casts, this pattern gets dramatically easier.</p>
+
+<p><strong>3. Silent failures are the expensive ones.</strong> The <code>class</code>-property collision was the most expensive bug of the two phases, and it never raised an exception anywhere in the stack. Cypher's <code>MATCH</code> returning zero rows is not an error. The Python loader's "edges pushed: 2,553" is <em>accurate</em> — 2,553 UNWIND rows were sent. The count drop happened entirely inside Neo4j's MERGE semantics, without a log line, without a warning, without even a statistic that flagged it. The only defense is verification: compare output to expectation, aggressively, at every layer. This is not a new lesson, but it is one I keep relearning.</p>
+
+<p>The experience again was that the AI pair programmer earned its seat. It proposed the split between FK edges and aggregate edges; it chose <code>jsonb</code> over columns-per-property; it caught my initial 120 K-node sample size for what it was ("over-expansion through small dims"); it asked whether I wanted <code>--full</code> to even exist given what would happen to the Browser. When the <code>class</code>-collision bug showed up, it didn't <em>find</em> the bug — I did, by eye — but it executed the exact diagnostic sequence (check Postgres output, check iterator output, spot-check a specific node in Neo4j) that let me narrow it down in under fifteen minutes. That's what "pair programmer" means now: not autocomplete, but a second set of disciplined hands on the debugger.</p>
+
+<h2>The series continues</h2>
+
+<p>Two phases down on this warehouse. Zero clean-up needed to justify adding them — both shipped behind the existing dashboard, both reviewable in PRs, both runnable with three batch scripts each. The ontology lives in a JSON file that can be re-read every time I want to re-materialize against a different storage layer.</p>
+
+<p>Next up is what Part 1 promised: <strong>Snowflake</strong>. The cost model is different, the partitioning is different, the tooling is different, and the "warehouse" concept lands in a completely different place than it does on Postgres. I want to see what happens when the same four-phase spec hits a platform designed around zero-copy clones and micro-partitions instead of <code>CREATE INDEX</code>.</p>
+
+<p>After that: <strong>Databricks</strong>, where the lakehouse question gets real; <strong>Teradata</strong>, where brownfield migration is the entire story; <strong>Greenplum</strong>, for MPP Postgres with a distribution-key shaped hole through the middle of it. And I want to do at least one piece on the Phase 4/5 pattern transplanted onto a brownfield codebase — because retrofitting an ontology onto a 15-year-old Oracle warehouse is where this method gets <em>really</em> interesting.</p>
+
+<p>If you followed along after Part 1, thank you. The <a href="https://github.com/cgoat/Datawarehouse">repo</a> now has branches <code>phase-4-ontology-kg</code> and <code>phase-5-neo4j-display</code> you can check out and run. If you're landing here fresh, <a href="article.html">Part 1</a> has the backstory on why a 20-year data veteran got talked into spec-driven development in the first place.</p>
+
+<p>And if you work in data and want to see a specific warehouse, a specific brownfield migration pattern, or a specific business domain tried next — drop it in the comments. The series exists because readers asked for it; it'll keep going the same way.</p>
+
+<div class="footer">
+  Built with dbt-core 1.11, dbt-postgres 1.10, Postgres 17.5, Python 3.12 (stdlib + psycopg + neo4j-driver), PHP 8.4, Ollama running gemma4:latest, Neo4j 5.26 Community in Docker, and Claude Code on Windows.
+  Knowledge graph built over TPC-DS scale-factor 1 (~1 GB, 19.5 M rows across 25 tables) from <code>dbgen 2.10.0</code>.
+</div>
+
+</body>
+</html>

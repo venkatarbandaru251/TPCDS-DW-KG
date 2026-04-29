@@ -1,3 +1,4 @@
 psycopg[binary]>=3.2
 python-dotenv>=1.0
 dbt-postgres>=1.9
+neo4j>=5.0
